@@ -41,11 +41,11 @@ function kill_grab()
  {
 kill_grab_pid="";  kill_nlinuxgrab_pid=""; kill_netcat_pid=""; 
 
-kill_grab_pid=`ps aux | grep -i grab | grep -v grep | cut -d " " -f 2`
+kill_grab_pid=`ps aux | grep -i grab | grep -v grep | cut -d " " -f 3`
 
-kill_nlinuxgrab_pid=`ps aux | grep -i nlinuxgrab | grep -v grep | cut -d " " -f 2`
+kill_nlinuxgrab_pid=`ps aux | grep -i nlinuxgrab | grep -v grep | cut -d " " -f 3`
 
-kill_netcat_pid=`ps aux | grep -i netcat | grep -v grep | cut -d " " -f 2`
+kill_netcat_pid=`ps aux | grep -i netcat | grep -v grep | cut -d " " -f 3`
 
 if [ "$kill_grab_pid" = "" ]; then 
 
