@@ -35,6 +35,58 @@ function read_config_file ()
    }
 
 
+# Kill grab and nlinuxgrab
+
+function kill_grab ()
+   {
+
+    kill_grab_pid="";  kill_nlinuxgrab_pid=""; kill_netcat_pid=""; 
+
+    kill_grab_pid=`ps aux | grep -i grab | grep -v grep | cut -d " " -f 2`
+
+    kill_nlinuxgrab_pid=`ps aux | grep -i nlinuxgrab | grep -v grep | cut -d " " -f 2`
+
+    kill_netcat_pid=`ps aux | grep -i netcat | grep -v grep | cut -d " " -f 2`
+
+    if [ "$kill_grab_pid" = "" ]; then 
+
+    echo -e "Kein GRAB Prozess vorhanden"    
+
+    else
+
+    echo -e "GRAB PID: $kill_grab_pid beendet" 
+
+    kill -9 $kill_grab_pid
+
+    if [ "$kill_netcat_pid" = "" ]; then
+
+    echo -e "Kein netcat Prozess vorhanden"
+
+    else
+
+    echo -e "netcat PID: $kill_netcat_pid beendet"
+ 
+    kill -9 $kill_netcat_pid
+
+    if [ "$kill_nlinuxgrab_pid" = "" ]; then
+
+    echo -e "Kein nlinuxgrab Prozess vorhanden"
+
+    else
+
+    echo -e "nlinuxgrab PID: $kill_nlinuxgrab_pid beendet"
+
+    kill -9 $kill_nlinuxgrab_pid
+
+
+    fi
+
+    fi
+
+    fi
+   }
+
+
 # Help menu
 
 function help_menu ()
@@ -43,6 +95,7 @@ function help_menu ()
     echo -e "\n-t, --timerd\t\ttimerd@dbox2 function"
     echo -e "-h, --help\t\tdisplay this help and exit"
     echo -e "-v, --version\t\toutput version information and exit"
+    echo -e "-k, --kill\t\tkills current running nlinuxgrab, grab and netcat (background PID)"
     echo -e "\notherwise starts remote programming for dbox2"
     echo -e "\nReport bugs to <arnd.feldmueller@t-online.de>."
    }
@@ -135,7 +188,14 @@ function check_playback_mode ()
 
 function timerd ()
    {
-    read_config_file   
+
+    read_config_file
+ 
+    STREAMXMLFILE=/tmp/.stream.xml.$$
+    
+    STREAMDATE=`date "+%H-%M-%S_%d-%m-%Y"`   
+
+    $NETCAT_BIN -l -p $STREAMPORT > $STREAMXMLFILE &
 
     action=NULL   
 
@@ -143,16 +203,10 @@ function timerd ()
 
     do
     
-    STREAMXMLFILE=/tmp/.stream.xml.$$
-
-    STREAMDATE=`date "+%H-%M-%S_%d-%m-%Y"`
-
-    $NETCAT_BIN -l -p $STREAMPORT > $STREAMXMLFILE
-
     if [ -s $STREAMXMLFILE ]
 
     then
-    
+  
     streamchannel=`(grep "\<channelname" < $STREAMXMLFILE) | sed "s/<[^<>]*>//g" | sed -e "s/ /_/g" | sed -e "s/^_*//g"`
     
     streamtitle=`(grep "\<epgtitle" < $STREAMXMLFILE) | sed "s/<[^<>]*>//g" | sed -e "s/ /_/g" | sed -e "s/^_*//g"`
@@ -167,8 +221,6 @@ function timerd ()
 
     filestreamname=$DISK_SPACE/$streamtitle\_$streamchannel\_$STREAMDATE
 
-    grab_check=`ps | grep grab | grep -v grep`
-
     action=`(grep "\<record c" < $STREAMXMLFILE) | sed "s/<record command\=\"//g" | sed "s/\">//g"`
 
     if [ $action = stop ]; then
@@ -177,19 +229,25 @@ function timerd ()
 
     kill -9 $grab_pid_search
     
-    echo "Stopp!" 5 29
+    echo -e "\nStopp!" > /dev/stdout
 
     wait
 
     fi
 
-    if [ $action = record ]; 
+    if [ $action = record ];
 
-    then if [ -n $grabpid ]; then
+    grab_pid_snd_search=`ps aux | grep -i grab | grep -v grep | cut -d " " -f 2` 
 
-    echo  "Aufnahme von : "$filestreamname
+    then if [ -z $grab_pid_snd_search ]; then
+
+    echo -e "\nAufnahme von : "$filestreamname 
 
     ($GRAB_BIN -q -host $DBOX_IP -p $vpid $apid -s $MPGSIZE -o $filestreamname) & 
+
+    else
+
+    echo -e "\nEin anderer GRAB Prozess laeuft noch (PID: $grab_pid_snd_search)" 
  
     fi
 
@@ -199,7 +257,7 @@ function timerd ()
 
     else
 
-    echo "Warte auf Aufnahme..."
+    echo -e "\nWarte auf Aufnahme..."
 
     fi
 
@@ -495,6 +553,7 @@ case "$1" in
     -h | --help)    help_menu ;;
     -v | --version) echo -e "nlinuxgrab $VERSION\nWritten by Arnd Feldmueller and Max Kliche. \
                              \n\nCopyright (C) 2002/2003" ;;
-    -t | --timerd)  timerd ;;
+    -t | --timerd)  timerd & ;;
+    -k | --kill)    kill_grab ;;
     *)              first_build ;; 
 esac

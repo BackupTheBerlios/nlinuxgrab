@@ -43,3 +43,7 @@ NETCAT_BIN="/usr/bin/netcat"
 # streamport for timerd@dbox2 (set it in neutrino with the same value)
 STREAMPORT=4444
 
+1.16 23/08/2002
+
+Flag -k (--kill) for killing current running grab
+

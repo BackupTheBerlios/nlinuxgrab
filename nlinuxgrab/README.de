@@ -38,7 +38,7 @@ nlinuxgrab ist kein GPL project mehr
 1.15 22/08/2002
 
 nlinuxgrab kann jetzt flags ./nlinuxgrab -h oder --help
-timerd (-t bzw. --timerd daemon) fuer timerd@dbox2 (neutrino)
+timerd (-t bzw. --timer daemon) fuer timerd@dbox2 (neutrino)
 config_nlinuxgrab erweitert auf:
 
 # Total path to netcat
@@ -47,4 +47,6 @@ NETCAT_BIN="/usr/bin/netcat"
 # streamport for timerd@dbox2 (set it in neutrino with the same value)
 STREAMPORT=4444
 
+1.16 23/08/2002
 
+Flag -k (--kill) um den laufen grab zu beenden.
