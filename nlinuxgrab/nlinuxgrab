@@ -230,25 +230,26 @@ if [ -s $STREAMXMLFILE ]; then
 
     wait
 
-fi
-
-if [ $action = record ]; then
-
-   grab_pid_snd_search=`ps aux | grep -i grab | grep -v grep | cut -d " " -f 2` 
-
- if [ -z $grab_pid_snd_search ]; then
-
-    echo -e "\nAufnahme von : "$filestreamname 
-
-   ($GRAB_BIN -q -host $DBOX_IP -p $vpid $apid -s $MPGSIZE -o $filestreamname) & 
-
-   else
-
-      echo -e "\nEin anderer GRAB Prozess laeuft noch (PID: $grab_pid_snd_search)" 
- 
-fi
 
  fi
+
+  if [ $action = record ]; then
+
+     grab_pid_snd_search=`ps aux | grep -i grab | grep -v grep | cut -d " " -f 2` 
+
+   if [ -z $grab_pid_snd_search ]; then
+
+      echo -e "\nAufnahme von : "$filestreamname 
+
+      ($GRAB_BIN -q -host $DBOX_IP -p $vpid $apid -s $MPGSIZE -o $filestreamname) & 
+
+      else
+
+         echo -e "\nEin anderer GRAB Prozess laeuft noch (PID: $grab_pid_snd_search)" 
+ 
+  fi
+
+   fi
 
 rm $STREAMXMLFILE
 
@@ -256,7 +257,7 @@ rm $STREAMXMLFILE
 
       echo -e "\nWarte auf Aufnahme..."
 
-   fi
+fi
 
 done
  }
