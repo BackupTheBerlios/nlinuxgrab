@@ -51,3 +51,6 @@ Flag -k (--kill) for killing current running grab
 
 Parse error in pipe for atjob fixed
 
+1.18 04/10/2002
+
+Some bugfixes ;-)

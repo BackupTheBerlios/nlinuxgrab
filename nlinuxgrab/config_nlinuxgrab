@@ -41,4 +41,4 @@ epg_count=1
 #rm $HOME/$EPGLIST
 
 # version
-VERSION="1.17"
+VERSION="1.18"

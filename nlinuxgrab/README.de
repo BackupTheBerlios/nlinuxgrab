@@ -54,3 +54,7 @@ Flag -k (--kill) um den laufen grab zu beenden.
 1.17 27/09/2002
 
 Fehler beim Parsen behoben (at)
+
+1.18 04/10/20002
+
+Eine Bugfixes ;-)
