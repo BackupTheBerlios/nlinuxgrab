@@ -1,0 +1,35 @@
+
+# change these settings to your needs
+
+# Channellist file  
+CHANNELLIST=".channellist"
+
+# Current Eventlist file
+EVENTLIST=".eventlist"
+
+# EPG converted file
+EPGLIST=".epglist"
+
+# DBoxII IP or hostname
+DBOX_IP="192.168.0.3"		
+	
+# Path to grab
+GRAB_BIN="/home/submuffi/bin/grab"
+
+# Disk space path
+DISK_SPACE="/opt/diskspace"
+
+# MByte for mpg size, my default is 700 MB for convertin and burning SVCD 
+MPGSIZE="700"
+
+# Asks for current channel		
+CURRENT_CHANNEL=`lynx -dump http://$DBOX_IP/control/zapto` 
+
+# the recording file list
+RECORDING_FILE=$HOME/.recordingfile
+
+epg_count=1
+#rm $HOME/$EPGLIST
+# EPG field select
+
+VERSION="1.14"

@@ -1,0 +1,32 @@
+Version 1.13
+
+nlinuxgrab from Arnd Feldmueller <Submuffi@IRC> and Max Kliche <fronti@IRC>
+
+
+Make settings in file config_nlinuxgrab
+
+
+required:
+
+at		=> 3.1.8
+bash		=> 2.05.0
+awk		=> 3.1.0
+dialog		=> 0.62
+wget		=> 1.7
+lynx		=> 2.8.4
+
+grab      	use it from CVS CDK!
+
+
+ATTENTION: Please check your system- and DBOX2 Time!!!!!!!!!!!!
+
+Changes:
+
+1.13 05/08/2002
+
+Playback Mode deleted: Playback Mode yet in status on mode.
+MPGSIZE in config_nlinuxgrab added for MPG size. default is 700 MByte (example for burning/converting SVCD)
+
+1.14 06/08/2002
+
+nlinuxgrab is now a non GPL project

@@ -1,0 +1,403 @@
+#!/bin/sh
+
+# 	nlinuxgrab frontend - a part of Linux@DBoxII-Project
+#
+#	nlinuxgrab is not GPL or LGPL project
+#	
+#       Copyright (C) 2002/2003 Arnd Feldmueller
+#	eMail: arnd.feldmueller@t-online.de
+#       SubMuffi@IRC #dbox2
+#
+#	Written by Arnd Feldmueller and Max Kliche 
+#
+#	Sponsored by my wife Nanthana, trance music, 
+#       little capuccino, cigarettes and motivations 
+#       by fronti ;)
+#
+#	revision: 1.14
+#
+#       $ID$
+
+function read_config_file ()
+   {
+    if [ -e $HOME/.config_nlinuxgrab ]
+
+    then
+
+    . $HOME/.config_nlinuxgrab
+
+    else
+
+    . config_nlinuxgrab
+
+    fi
+   }
+
+# EPG field select
+
+function epg_field_select ()
+   {
+    awk '{printf NR". "  $4 " " $5 " " $6 " " $7"\n"}' $HOME/$EPGLIST | tr "@" " "
+   }
+
+# Checks for nhttpd results: $status_msg_check_nhttpd $check_nhttpd_time
+
+function check_nhttpd_status ()
+   {
+    check_nhttpd_time=`lynx -dump http://$DBOX_IP/control/gettime`    
+
+    if [ "$check_nhttpd_time" = "" ]; then
+
+    status_msg_check_nhttpd="error"
+
+    check_nhttpd_time="n/a"
+
+    else
+
+    status_msg_check_nhttpd="ok"
+
+    fi
+   }
+ 
+# stops playback mode for grabbing result: $stopplayback
+
+function stop_playback_mode ()
+   {
+    stopplayback=`lynx -dump http://$DBOX_IP/control/zapto?stopplayback`
+   }
+
+
+# starts playback mode after grabbing result: $startplayback
+
+function start_playback_mode ()
+   {
+    startplayback=`lynx -dump http://$DBOX_IP/control/zapto?startplayback`
+   }
+
+
+# check playback mode for grabbing result: $status_msg_check_playback_mode
+
+function check_playback_mode ()
+   {
+
+    start_playback_mode
+
+    if [ "$startplayback" = "ok" ]; then
+
+    status_msg_check_playback_mode="on"
+
+    else
+
+    stop_playback_mode
+
+    if [ "$startplayback" = "" ]; then
+
+    status_msg_check_playback_mode="n/a"
+
+    else
+
+    if [ "$stopplayback" = "ok"]; then
+
+    status_msg_check_playback_mode="off"
+
+    else
+
+    if [ "$stopplayback" = ""]; then
+
+    status_msg_check_playback_mode="n/a"
+
+   fi 
+
+   fi
+
+   fi
+
+   fi
+  }
+
+
+# first build
+
+function first_build ()
+   {
+    read_config_file
+
+    check_nhttpd_status
+
+    check_playback_mode
+
+    info_box
+  
+    get_channellist
+
+    generate_channellist_dialog
+
+    get_onidsid_from_channel_select $channel_select
+
+    zap_to_onidsid $onidsid
+
+    get_vpid_apid_decimal
+
+    get_vpid_apid_hex $vpid_apid_decimal
+
+    switch_back_to_seen_channel
+
+    generate_eventlist
+
+    preview
+
+    epg_list_select
+
+    start_recording
+   }
+
+
+# start recording
+
+function start_recording ()
+   {
+    while read oid vpid apid date time length title
+    do
+       DATE=`echo $date | sed s/.$//`
+
+    echo  "lynx -dump http://$DBOX_IP/control/zapto\?$oid ; \
+	$GRAB_BIN -host $DBOX_IP -p $vpid $apid \
+                    -m $length -s $MPGSIZE -o $DISK_SPACE/$title" | at $time $DATE 
+    
+    echo "Programmed: title: "$title "minutes: "$length "date: "$time" "$DATE
+
+    done < $RECORDING_FILE
+
+    rm $RECORDING_FILE
+   }
+
+
+function zap_to_onidsid ()
+   {
+    zapto_onidsid=`lynx -dump http://$DBOX_IP/control/zapto?$1`    
+   }
+
+
+# switchs to back to the current seen channel
+
+function switch_back_to_seen_channel ()
+   {
+    zapto_to_current_seen_channel=`lynx -dump\
+           http://$DBOX_IP/control/zapto?$CURRENT_CHANNEL`
+   }
+
+
+# generates channellist
+
+function get_channellist ()
+   {
+    if [ -e "$HOME/$CHANNELLIST" ]; then
+   
+    return  
+
+    else
+
+    clear
+   
+    echo "Getting channellist from $DBOX_IP ..."  
+
+    wget -O $HOME/$CHANNELLIST http://$DBOX_IP/control/channellist 2>/dev/null
+
+    return
+
+    fi
+   }
+
+
+# generate eventlist
+
+function generate_eventlist ()
+   {
+    echo "Please wait... generating Eventlist"
+
+    wget -O $HOME/$EVENTLIST http://$DBOX_IP/control/epg?$onidsid  2>/dev/null
+
+    if [ -s $HOME/$EVENTLIST ]
+
+    then
+
+    while read crap unixtimestamp duration title
+
+    do epg_convert "$unixtimestamp" "$duration" "$title"
+
+    done < $HOME/$EVENTLIST
+
+    else
+
+    dialog --msgbox "Keine EPG Liste vorhanden" 5 29
+ 
+    rm $HOME/$EVENTLIST
+
+    first_build
+
+    fi
+   }
+
+
+# gets vpid and apid in decimal results: $apid_vpid 
+
+function get_vpid_apid_decimal ()
+   {
+    vpid_apid_decimal=`lynx -dump http://$DBOX_IP/control/zapto?getpids |\
+                tr "\n" " "`
+   }
+
+
+# gets onidsid from channel select result: $onidsid
+
+function get_onidsid_from_channel_select ()
+   {
+    onidsid=`awk ' NR=="'$1'"{print $1}' $HOME/$CHANNELLIST`
+   }
+
+
+# Convert unixtimestamp, secondes to minutes and 
+# titlename results: $epg_count $epg_result_date $epg_minutes $epg_titlename
+
+function epg_convert ()
+   {  
+    current_unixtimestamp=`date +%s`
+
+    if [ "$current_unixtimestamp" -lt "$1" ]; then
+
+    epg_result_date=`date -d "1970-01-01 00:00:00 CET + $1 seconds"  +'%d.%m. %H:%M'`
+
+    epg_minutes=`expr $2 / 60`
+
+    epg_titlename=$( echo "$3" |  sed -e 's/ /_/g')
+
+    echo "$onidsid" "$vpid" "$apid" "$epg_result_date" "$epg_minutes" "$epg_titlename">> $HOME/$EPGLIST
+
+    fi
+   }
+
+
+# Convert decimal to hex results: $apid $vpid 
+
+function get_vpid_apid_hex ()
+   {
+    vpid=`printf %0x $1`
+
+    apid=`printf %0x $2`
+   }
+
+
+function generate_channellist_dialog ()
+   {
+    DIALOG_SESSION_CHANNELLIST="/tmp/.dialogss$$"
+
+    clear
+
+    while read oid text
+
+    do
+
+    let chl_count=chl_count+1
+
+    text=$( echo "$text" | sed -e 's/ /_/g')
+   
+    channellist_parameters="$channellist_parameters $chl_count $text"
+   
+    done < $HOME/$CHANNELLIST
+
+    dialog --menu Programmauswahl 20 40 10 $channellist_parameters  2>$DIALOG_SESSION_CHANNELLIST
+
+    channel_select="`cat $DIALOG_SESSION_CHANNELLIST`"
+
+    rm $DIALOG_SESSION_CHANNELLIST
+
+    if test "$channel_select" = "" ; then 
+
+    exit -1
+
+    fi
+   }
+
+
+#this function selects a film to record form $EPGLIST
+# result in $HOME/.recordingfile
+
+function epg_list_select ()
+   {
+     DIALOG_SESSION_EPGLIST=/tmp/tmp_dialog.$$
+
+     listing_dialog_epg=`awk '{printf NR" "$7"\n"}' $HOME/$EPGLIST`
+
+     dialog --menu Filmauswahl 20 60 10 $listing_dialog_epg 2>$DIALOG_SESSION_EPGLIST
+  
+     dialog_result="`cat $DIALOG_SESSION_EPGLIST`"
+
+     if test "$dialog_result" = "" ; then
+
+     exit -1
+
+     fi
+
+     event_parameters=`awk ' NR=="'$dialog_result'"{print $1" "$2" "$3" "$4 " "$5 " "$6 " " $7}' $HOME/$EPGLIST >>$RECORDING_FILE`
+
+     rm $DIALOG_SESSION_EPGLIST
+
+     rm $HOME/$EPGLIST
+   }
+
+
+function info_box ()
+   {
+
+    atime=`date +%H:%M:%S`
+
+    dialog --msgbox "Version $VERSION\n\nClient time: $atime\n\nDBoxII Time: $check_nhttpd_time Channel: $CURRENT_CHANNEL\n\nPlayback Mode: $status_msg_check_playback_mode\n\nnhttpd: $status_msg_check_nhttpd"  12 42
+   }   
+
+function preview ()
+   {
+
+    read_config_file
+
+    DIALOG_PREVIEW_TMPFILE=/tmp/tmp_preview$$
+
+    if [ -e $RECORDING_FILE ] 
+
+    then
+    
+    echo "************ Aufzunehmende Filme ************" > $DIALOG_PREVIEW_TMPFILE	
+
+    awk '{printf NR"." " "$4" "$5 " "$6 " "$7"\n\n"}' $RECORDING_FILE >>$DIALOG_PREVIEW_TMPFILE
+    
+    echo "*********************************************" >> $DIALOG_PREVIEW_TMPFILE
+
+    echo "" >> $DIALOG_PREVIEW_TMPFILE 
+
+    echo "EPG-List            --->" >> $DIALOG_PREVIEW_TMPFILE
+
+    awk '{printf NR"." " "$4" "$5 " "$6 " "$7"\n\n"}' $HOME/$EPGLIST >>$DIALOG_PREVIEW_TMPFILE
+
+    echo "<---            EPG-List" >> $DIALOG_PREVIEW_TMPFILE
+
+    dialog --title "EPG-Vorschau mit Aufnahmeliste" --textbox $DIALOG_PREVIEW_TMPFILE 20 60
+
+    else
+
+    echo "*** ACHTUNG: Noch keine Aufnahmeliste vorhanden ***" > $DIALOG_PREVIEW_TMPFILE
+
+    echo "" >> $DIALOG_PREVIEW_TMPFILE
+
+    echo "EPG-List            --->" >> $DIALOG_PREVIEW_TMPFILE
+
+    awk '{printf NR"." " "$4" "$5 " "$6 " "$7"\n\n"}' $HOME/$EPGLIST >>$DIALOG_PREVIEW_TMPFILE
+
+    echo "<---            EPG-List" >> $DIALOG_PREVIEW_TMPFILE
+
+    dialog --title "EPG-List Vorschau" --textbox $DIALOG_PREVIEW_TMPFILE 20 60
+
+    fi
+   }
+ 
+
+
+first_build

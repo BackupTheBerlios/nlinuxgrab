@@ -1,0 +1,32 @@
+Version 1.14
+
+nlinuxgrab von Arnd Feldmueller <Submuffi@IRC> und Max Kliche <fronti@IRC>
+
+
+Bitte die Setting in config_linuxgrab machen.
+
+
+Es wird (mindestens) benötigt:
+
+at		=> 3.1.8
+bash		=> 2.05.0
+awk 		=> 3.1.0
+dialog		=> 0.62
+wget		=> 1.7
+lynx		=> 2.8.4
+
+grab		liegt nicht mehr bei! bitte das aus dem CVS CDK nehmen
+
+
+ACHTUNG: Bitte pruefen ob die Systemzeit mit der von der DBox2 einigermassen identisch ist!!!
+
+Aenderungen:
+
+1.13 05/08/2002
+
+Playback Mode rausgenommen: Playback Mode ist jetzt auf an (on).
+MPGSIZE in config_nlinuxgrab hinzugefuegt fuer MPG Laenge. Standard ist jetzt 700 MB (nützlich für SVCD!)
+
+1.14 06/08/2002
+
+nlinuxgrab ist kein GPL project mehr
