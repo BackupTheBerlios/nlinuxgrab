@@ -305,13 +305,13 @@ function start_recording()
  {
 while read oid vpid apid date time length title
 do
-# DATE=`echo $date | sed s/.$//`
+DATE=`echo $date | sed s/.$//`
 
    echo  "lynx -dump http://$DBOX_IP/control/zapto\?$oid ; \
 	GRAB_BIN -host $DBOX_IP -p $vpid $apid \
                     -m $length -s $MPGSIZE -o $DISK_SPACE/$title" | at $time $DATE 
     
-echo "Programmed: title: "$title "minutes: "$length "date: "$time" "$date
+echo "Programmed: title: "$title "minutes: "$length "date: "$time" "$DATE
 echo "Record Path: "$DISK_SPACE/$title 
 echo "For record queue type: atq and for delete job atrm <jobnumber>"
 
