@@ -1,184 +1,183 @@
 #!/bin/sh
 
-# 	nlinuxgrab frontend - a part of Linux@DBoxII-Project
+# nlinuxgrab frontend - a part of Linux@DBoxII-Project
 #
-#	nlinuxgrab is not GPL or LGPL project
+# nlinuxgrab is not GPL or LGPL project
 #	
-#       Copyright (C) 2002/2003 Arnd Feldmueller
-#	eMail: arnd.feldmueller@t-online.de
-#       SubMuffi@IRC #dbox2
+# Copyright (C) 2002/2003 Arnd Feldmueller
+# eMail: arnd.feldmueller@t-online.de
+# SubMuffi@IRC #dbox2
 #
-#	Written by Arnd Feldmueller and Max Kliche 
+# Written by Arnd Feldmueller and Max Kliche 
 #
-#	Sponsored by my wife Nanthana, trance music, 
-#       little capuccino, cigarettes and motivations 
-#       by fronti ;)
+# Sponsored by my wife Nanthana, trance music, 
+# little capuccino, cigarettes and motivations 
+# by fronti ;)
 #
-#	revision: 1.16
+# revision: 1.16
 #
-#       $ID$
+# $ID$
 #
 
-function read_config_file ()
-   {
-    if [ -e $HOME/.config_nlinuxgrab ]
+function read_config_file()
+ {
+if [ -e $HOME/.config_nlinuxgrab ]
 
-    then
+   then
 
-    . $HOME/.config_nlinuxgrab
+      . $HOME/.config_nlinuxgrab
 
-    else
+   else
 
-    . config_nlinuxgrab
+      . config_nlinuxgrab
 
-    fi
-   }
+fi
+ }
 
 
 # Kill grab and nlinuxgrab
 
-function kill_grab ()
-   {
+function kill_grab()
+ {
+kill_grab_pid="";  kill_nlinuxgrab_pid=""; kill_netcat_pid=""; 
 
-    kill_grab_pid="";  kill_nlinuxgrab_pid=""; kill_netcat_pid=""; 
+kill_grab_pid=`ps aux | grep -i grab | grep -v grep | cut -d " " -f 2`
 
-    kill_grab_pid=`ps aux | grep -i grab | grep -v grep | cut -d " " -f 2`
+kill_nlinuxgrab_pid=`ps aux | grep -i nlinuxgrab | grep -v grep | cut -d " " -f 2`
 
-    kill_nlinuxgrab_pid=`ps aux | grep -i nlinuxgrab | grep -v grep | cut -d " " -f 2`
+kill_netcat_pid=`ps aux | grep -i netcat | grep -v grep | cut -d " " -f 2`
 
-    kill_netcat_pid=`ps aux | grep -i netcat | grep -v grep | cut -d " " -f 2`
+if [ "$kill_grab_pid" = "" ]; then 
 
-    if [ "$kill_grab_pid" = "" ]; then 
+   echo -e "Kein GRAB Prozess vorhanden"    
 
-    echo -e "Kein GRAB Prozess vorhanden"    
+   else
 
-    else
+      echo -e "GRAB PID: $kill_grab_pid beendet" 
 
-    echo -e "GRAB PID: $kill_grab_pid beendet" 
+      kill -9 $kill_grab_pid
 
-    kill -9 $kill_grab_pid
-
-    if [ "$kill_netcat_pid" = "" ]; then
+ if [ "$kill_netcat_pid" = "" ]; then
 
     echo -e "Kein netcat Prozess vorhanden"
 
     else
 
-    echo -e "netcat PID: $kill_netcat_pid beendet"
+       echo -e "netcat PID: $kill_netcat_pid beendet"
  
-    kill -9 $kill_netcat_pid
+       kill -9 $kill_netcat_pid
 
-    if [ "$kill_nlinuxgrab_pid" = "" ]; then
+  if [ "$kill_nlinuxgrab_pid" = "" ]; then
 
-    echo -e "Kein nlinuxgrab Prozess vorhanden"
+     echo -e "Kein nlinuxgrab Prozess vorhanden"
 
-    else
+     else
 
-    echo -e "nlinuxgrab PID: $kill_nlinuxgrab_pid beendet"
+        echo -e "nlinuxgrab PID: $kill_nlinuxgrab_pid beendet"
 
-    kill -9 $kill_nlinuxgrab_pid
+        kill -9 $kill_nlinuxgrab_pid
 
 
-    fi
+fi
 
-    fi
+ fi
 
-    fi
-   }
+  fi
+ }
 
 
 # Help menu
 
-function help_menu ()
-   {
-    echo -e "Usage: $0 [OPTION]"
-    echo -e "\n-t, --timerd\t\ttimerd@dbox2 function"
-    echo -e "-h, --help\t\tdisplay this help and exit"
-    echo -e "-v, --version\t\toutput version information and exit"
-    echo -e "-k, --kill\t\tkills current running nlinuxgrab, grab and netcat (background PID)"
-    echo -e "\notherwise starts remote programming for dbox2"
-    echo -e "\nReport bugs to <arnd.feldmueller@t-online.de>."
-   }
+function help_menu()
+ {
+echo -e "Usage: $0 [OPTION]"
+echo -e "\n-t, --timerd\t\ttimerd@dbox2 function"
+echo -e "-h, --help\t\tdisplay this help and exit"
+echo -e "-v, --version\t\toutput version information and exit"
+echo -e "-k, --kill\t\tkills current running nlinuxgrab, grab and netcat (background PID)"
+echo -e "\notherwise starts remote programming for dbox2"
+echo -e "\nReport bugs to <arnd.feldmueller@t-online.de>."
+ }
 
 
 # EPG field select
 
-function epg_field_select ()
-   {
-    awk '{printf NR". "  $4 " " $5 " " $6 " " $7"\n"}' $HOME/$EPGLIST | tr "@" " "
-   }
+function epg_field_select()
+ {
+awk '{printf NR". "  $4 " " $5 " " $6 " " $7"\n"}' $HOME/$EPGLIST | tr "@" " "
+ }
 
 # Checks for nhttpd results: $status_msg_check_nhttpd $check_nhttpd_time
 
-function check_nhttpd_status ()
-   {
-    check_nhttpd_time=`lynx -dump http://$DBOX_IP/control/gettime`    
+function check_nhttpd_status()
+ {
+check_nhttpd_time=`lynx -dump http://$DBOX_IP/control/gettime`    
 
-    if [ "$check_nhttpd_time" = "" ]; then
+if [ "$check_nhttpd_time" = "" ]; then
 
-    status_msg_check_nhttpd="error"
+   status_msg_check_nhttpd="error"
 
-    check_nhttpd_time="n/a"
+   check_nhttpd_time="n/a"
 
-    else
+   else
 
-    status_msg_check_nhttpd="ok"
+      status_msg_check_nhttpd="ok"
 
-    fi
-   }
+fi
+ }
  
 # stops playback mode for grabbing result: $stopplayback
 
-function stop_playback_mode ()
-   {
-    stopplayback=`lynx -dump http://$DBOX_IP/control/zapto?stopplayback`
-   }
+function stop_playback_mode()
+ {
+stopplayback=`lynx -dump http://$DBOX_IP/control/zapto?stopplayback`
+ }
 
 
 # starts playback mode after grabbing result: $startplayback
 
-function start_playback_mode ()
-   {
-    startplayback=`lynx -dump http://$DBOX_IP/control/zapto?startplayback`
-   }
+function start_playback_mode()
+ {
+startplayback=`lynx -dump http://$DBOX_IP/control/zapto?startplayback`
+ }
 
 
 # check playback mode for grabbing result: $status_msg_check_playback_mode
 
-function check_playback_mode ()
-   {
+function check_playback_mode()
+ {
 
-    start_playback_mode
+start_playback_mode
 
-    if [ "$startplayback" = "ok" ]; then
+if [ "$startplayback" = "ok" ]; then
 
-    status_msg_check_playback_mode="on"
+   status_msg_check_playback_mode="on"
 
-    else
+   else
 
-    stop_playback_mode
+      stop_playback_mode
 
-    if [ "$startplayback" = "" ]; then
-
-    status_msg_check_playback_mode="n/a"
-
-    else
-
-    if [ "$stopplayback" = "ok"]; then
-
-    status_msg_check_playback_mode="off"
-
-    else
-
-    if [ "$stopplayback" = ""]; then
+ if [ "$startplayback" = "" ]; then
 
     status_msg_check_playback_mode="n/a"
 
-   fi 
+    else
 
-   fi
+  if [ "$stopplayback" = "ok"]; then
 
-   fi
+     status_msg_check_playback_mode="off"
+
+     else
+
+   if [ "$stopplayback" = ""]; then
+
+      status_msg_check_playback_mode="n/a"
+
+fi 
+
+ fi
+
+  fi
 
    fi
   }
@@ -186,44 +185,42 @@ function check_playback_mode ()
 
 # timerd build
 
-function timerd ()
-   {
+function timerd()
+ {
 
-    read_config_file
+read_config_file
  
-    STREAMXMLFILE=/tmp/.stream.xml.$$
+STREAMXMLFILE=/tmp/.stream.xml.$$
     
-    STREAMDATE=`date "+%H-%M-%S_%d-%m-%Y"`   
+STREAMDATE=`date "+%H-%M-%S_%d-%m-%Y"`   
 
-    $NETCAT_BIN -l -p $STREAMPORT > $STREAMXMLFILE &
+$NETCAT_BIN -l -p $STREAMPORT > $STREAMXMLFILE &
 
-    action=NULL   
+action=NULL   
 
-    while [ $action = $action ]; 
+while [ $action = $action ]; 
 
-    do
+do
     
-    if [ -s $STREAMXMLFILE ]
-
-    then
+if [ -s $STREAMXMLFILE ]; then
   
-    streamchannel=`(grep "\<channelname" < $STREAMXMLFILE) | sed "s/<[^<>]*>//g" | sed -e "s/ /_/g" | sed -e "s/^_*//g"`
+   streamchannel=`(grep "\<channelname" < $STREAMXMLFILE) | sed "s/<[^<>]*>//g" | sed -e "s/ /_/g" | sed -e "s/^_*//g"`
     
-    streamtitle=`(grep "\<epgtitle" < $STREAMXMLFILE) | sed "s/<[^<>]*>//g" | sed -e "s/ /_/g" | sed -e "s/^_*//g"`
+   streamtitle=`(grep "\<epgtitle" < $STREAMXMLFILE) | sed "s/<[^<>]*>//g" | sed -e "s/ /_/g" | sed -e "s/^_*//g"`
 
-    streamdec_vpid=`(grep "\<videopid" < $STREAMXMLFILE) | sed "s/<[^<>]*>//g"`
+   streamdec_vpid=`(grep "\<videopid" < $STREAMXMLFILE) | sed "s/<[^<>]*>//g"`
  
-    streamdec_apid=`(grep "\<audiopids selec" < $STREAMXMLFILE) | sed "s/<audiopids selected\=\"//g" | sed "s/\">//g"`
+   streamdec_apid=`(grep "\<audiopids selec" < $STREAMXMLFILE) | sed "s/<audiopids selected\=\"//g" | sed "s/\">//g"`
 
-    vpid=`printf %0x streamdec_vpid`    
+   vpid=`printf %0x streamdec_vpid`    
   
-    apid=`printf %0x streamdec_apid`
+   apid=`printf %0x streamdec_apid`
 
-    filestreamname=$DISK_SPACE/$streamtitle\_$streamchannel\_$STREAMDATE
+   filestreamname=$DISK_SPACE/$streamtitle\_$streamchannel\_$STREAMDATE
 
-    action=`(grep "\<record c" < $STREAMXMLFILE) | sed "s/<record command\=\"//g" | sed "s/\">//g"`
+   action=`(grep "\<record c" < $STREAMXMLFILE) | sed "s/<record command\=\"//g" | sed "s/\">//g"`
 
-    if [ $action = stop ]; then
+ if [ $action = stop ]; then
     
     grab_pid_search=`ps aux | grep -i grab | grep -v grep | cut -d " " -f 2` 
 
@@ -233,327 +230,323 @@ function timerd ()
 
     wait
 
-    fi
+fi
 
-    if [ $action = record ];
+if [ $action = record ]; then
 
-    grab_pid_snd_search=`ps aux | grep -i grab | grep -v grep | cut -d " " -f 2` 
+   grab_pid_snd_search=`ps aux | grep -i grab | grep -v grep | cut -d " " -f 2` 
 
-    then if [ -z $grab_pid_snd_search ]; then
+ if [ -z $grab_pid_snd_search ]; then
 
     echo -e "\nAufnahme von : "$filestreamname 
 
-    ($GRAB_BIN -q -host $DBOX_IP -p $vpid $apid -s $MPGSIZE -o $filestreamname) & 
+   ($GRAB_BIN -q -host $DBOX_IP -p $vpid $apid -s $MPGSIZE -o $filestreamname) & 
 
-    else
+   else
 
-    echo -e "\nEin anderer GRAB Prozess laeuft noch (PID: $grab_pid_snd_search)" 
+      echo -e "\nEin anderer GRAB Prozess laeuft noch (PID: $grab_pid_snd_search)" 
  
-    fi
+fi
 
-    fi
+ fi
 
-    rm $STREAMXMLFILE
+rm $STREAMXMLFILE
 
-    else
+   else
 
-    echo -e "\nWarte auf Aufnahme..."
+      echo -e "\nWarte auf Aufnahme..."
 
-    fi
+   fi
 
-    done
-   }
+done
+ }
 
 
 # first build
 
-function first_build ()
+function first_build()
    {
-    read_config_file
+read_config_file
 
-    check_nhttpd_status
+check_nhttpd_status
 
-    check_playback_mode
+check_playback_mode
 
-    info_box
+info_box
   
-    get_channellist
+get_channellist
 
-    generate_channellist_dialog
+generate_channellist_dialog
 
-    get_onidsid_from_channel_select $channel_select
+get_onidsid_from_channel_select $channel_select
 
-    zap_to_onidsid $onidsid
+zap_to_onidsid $onidsid
 
-    get_vpid_apid_decimal
+get_vpid_apid_decimal
 
-    get_vpid_apid_hex $vpid_apid_decimal
+get_vpid_apid_hex $vpid_apid_decimal
 
-    switch_back_to_seen_channel
+switch_back_to_seen_channel
 
-    generate_eventlist
+generate_eventlist
 
-    preview
+preview
 
-    epg_list_select
+epg_list_select
 
-    start_recording
-   }
+start_recording
+ }
 
 
 # start recording
 
-function start_recording ()
-   {
-    while read oid vpid apid date time length title
-    do
-       DATE=`echo $date | sed s/.$//`
+function start_recording()
+ {
+while read oid vpid apid date time length title
+do
+  DATE=`echo $date | sed s/.$//`
 
-    echo  "lynx -dump http://$DBOX_IP/control/zapto\?$oid ; \
-	$GRAB_BIN -host $DBOX_IP -p $vpid $apid \
+   echo  "lynx -dump http://$DBOX_IP/control/zapto\?$oid ; \
+	GRAB_BIN -host $DBOX_IP -p $vpid $apid \
                     -m $length -s $MPGSIZE -o $DISK_SPACE/$title" | at $time $DATE 
     
-    echo "Programmed: title: "$title "minutes: "$length "date: "$time" "$DATE
+echo "Programmed: title: "$title "minutes: "$length "date: "$time" "$DATE
 
-    done < $RECORDING_FILE
+done < $RECORDING_FILE
 
-    rm $RECORDING_FILE
-   }
+rm $RECORDING_FILE
+ }
 
 
-function zap_to_onidsid ()
-   {
-    zapto_onidsid=`lynx -dump http://$DBOX_IP/control/zapto?$1`    
-   }
+function zap_to_onidsid()
+ {
+zapto_onidsid=`lynx -dump http://$DBOX_IP/control/zapto?$1`    
+ }
 
 
 # switchs to back to the current seen channel
 
-function switch_back_to_seen_channel ()
-   {
-    zapto_to_current_seen_channel=`lynx -dump\
-           http://$DBOX_IP/control/zapto?$CURRENT_CHANNEL`
-   }
+function switch_back_to_seen_channel()
+ {
+zapto_to_current_seen_channel=`lynx -dump\
+ http://$DBOX_IP/control/zapto?$CURRENT_CHANNEL`
+ }
 
 
 # generates channellist
 
-function get_channellist ()
-   {
-    if [ -e "$HOME/$CHANNELLIST" ]; then
+function get_channellist()
+ {
+if [ -e "$HOME/$CHANNELLIST" ]; then
    
-    return  
+   return  
 
-    else
+   else
 
-    clear
+      clear
    
-    echo "Getting channellist from $DBOX_IP ..."  
+      echo "Getting channellist from $DBOX_IP ..."  
 
-    wget -O $HOME/$CHANNELLIST http://$DBOX_IP/control/channellist 2>/dev/null
+      wget -O $HOME/$CHANNELLIST http://$DBOX_IP/control/channellist 2>/dev/null
 
-    return
+   return
 
-    fi
-   }
+fi
+ }
 
 
 # generate eventlist
 
-function generate_eventlist ()
-   {
-    echo "Please wait... generating Eventlist"
+function generate_eventlist()
+ {
+echo "Please wait... generating Eventlist"
 
-    wget -O $HOME/$EVENTLIST http://$DBOX_IP/control/epg?$onidsid  2>/dev/null
+wget -O $HOME/$EVENTLIST http://$DBOX_IP/control/epg?$onidsid  2>/dev/null
 
-    if [ -s $HOME/$EVENTLIST ]
+if [ -s $HOME/$EVENTLIST ]
 
-    then
+   then
 
-    while read crap unixtimestamp duration title
+       while read crap unixtimestamp duration title
 
-    do epg_convert "$unixtimestamp" "$duration" "$title"
+do epg_convert "$unixtimestamp" "$duration" "$title"
 
-    done < $HOME/$EVENTLIST
+done < $HOME/$EVENTLIST
 
-    else
+   else
 
-    dialog --msgbox "Keine EPG Liste vorhanden" 5 29
+      dialog --msgbox "Keine EPG Liste vorhanden" 5 29
  
-    rm $HOME/$EVENTLIST
+      rm $HOME/$EVENTLIST
 
-    first_build
+      first_build
 
-    fi
-   }
+fi
+ }
 
 
 # gets vpid and apid in decimal results: $apid_vpid 
 
-function get_vpid_apid_decimal ()
-   {
-    vpid_apid_decimal=`lynx -dump http://$DBOX_IP/control/zapto?getpids |\
-                tr "\n" " "`
-   }
+function get_vpid_apid_decimal()
+ {
+vpid_apid_decimal=`lynx -dump http://$DBOX_IP/control/zapto?getpids |\
+                  tr "\n" " "`
+ }
 
 
 # gets onidsid from channel select result: $onidsid
 
-function get_onidsid_from_channel_select ()
-   {
-    onidsid=`awk ' NR=="'$1'"{print $1}' $HOME/$CHANNELLIST`
-   }
+function get_onidsid_from_channel_select()
+ {
+onidsid=`awk ' NR=="'$1'"{print $1}' $HOME/$CHANNELLIST`
+ }
 
 
 # Convert unixtimestamp, secondes to minutes and 
 # titlename results: $epg_count $epg_result_date $epg_minutes $epg_titlename
 
-function epg_convert ()
-   {  
-    current_unixtimestamp=`date +%s`
+function epg_convert()
+ {  
+current_unixtimestamp=`date +%s`
 
-    if [ "$current_unixtimestamp" -lt "$1" ]; then
+if [ "$current_unixtimestamp" -lt "$1" ]; then
 
-    epg_result_date=`date -d "1970-01-01 00:00:00 CET + $1 seconds"  +'%d.%m. %H:%M'`
+   epg_result_date=`date -d "1970-01-01 00:00:00 CET + $1 seconds"  +'%d.%m. %H:%M'`
 
-    epg_minutes=`expr $2 / 60`
+   epg_minutes=`expr $2 / 60`
 
-    epg_titlename=$( echo "$3" |  sed -e 's/ /_/g')
+   epg_titlename=$( echo "$3" |  sed -e 's/ /_/g')
 
-    echo "$onidsid" "$vpid" "$apid" "$epg_result_date" "$epg_minutes" "$epg_titlename">> $HOME/$EPGLIST
+   echo "$onidsid" "$vpid" "$apid" "$epg_result_date" "$epg_minutes" "$epg_titlename">> $HOME/$EPGLIST
 
-    fi
-   }
+fi
+ }
 
 
 # Convert decimal to hex results: $apid $vpid 
 
-function get_vpid_apid_hex ()
-   {
-    vpid=`printf %0x $1`
+function get_vpid_apid_hex()
+ {
+vpid=`printf %0x $1`
 
-    apid=`printf %0x $2`
-   }
+apid=`printf %0x $2`
+ }
 
 
-function generate_channellist_dialog ()
-   {
-    DIALOG_SESSION_CHANNELLIST="/tmp/.dialogss$$"
+function generate_channellist_dialog()
+ {
+DIALOG_SESSION_CHANNELLIST="/tmp/.dialogss$$"
 
-    clear
+clear
 
-    while read oid text
+while read oid text
 
-    do
+do
 
-    let chl_count=chl_count+1
+ let chl_count=chl_count+1
 
-    text=$( echo "$text" | sed -e 's/ /_/g')
+ text=$( echo "$text" | sed -e 's/ /_/g')
    
-    channellist_parameters="$channellist_parameters $chl_count $text"
+ channellist_parameters="$channellist_parameters $chl_count $text"
    
-    done < $HOME/$CHANNELLIST
+done < $HOME/$CHANNELLIST
 
-    dialog --menu Programmauswahl 20 40 10 $channellist_parameters  2>$DIALOG_SESSION_CHANNELLIST
+dialog --menu Programmauswahl 20 40 10 $channellist_parameters  2>$DIALOG_SESSION_CHANNELLIST
 
-    channel_select="`cat $DIALOG_SESSION_CHANNELLIST`"
+channel_select="`cat $DIALOG_SESSION_CHANNELLIST`"
 
-    rm $DIALOG_SESSION_CHANNELLIST
+rm $DIALOG_SESSION_CHANNELLIST
 
-    if test "$channel_select" = "" ; then 
+if test "$channel_select" = "" ; then 
 
-    exit -1
+exit -1
 
-    fi
-   }
+fi
+ }
 
 
 #this function selects a film to record form $EPGLIST
 # result in $HOME/.recordingfile
 
-function epg_list_select ()
-   {
-     DIALOG_SESSION_EPGLIST=/tmp/tmp_dialog.$$
+function epg_list_select()
+ {
+DIALOG_SESSION_EPGLIST=/tmp/tmp_dialog.$$
 
-     listing_dialog_epg=`awk '{printf NR" "$7"\n"}' $HOME/$EPGLIST`
+listing_dialog_epg=`awk '{printf NR" "$7"\n"}' $HOME/$EPGLIST`
 
-     dialog --menu Filmauswahl 20 60 10 $listing_dialog_epg 2>$DIALOG_SESSION_EPGLIST
+dialog --menu Filmauswahl 20 60 10 $listing_dialog_epg 2>$DIALOG_SESSION_EPGLIST
   
-     dialog_result="`cat $DIALOG_SESSION_EPGLIST`"
+dialog_result="`cat $DIALOG_SESSION_EPGLIST`"
 
-     if test "$dialog_result" = "" ; then
+if test "$dialog_result" = "" ; then
 
-     exit -1
+   exit -1
 
-     fi
+fi
 
-     event_parameters=`awk ' NR=="'$dialog_result'"{print $1" "$2" "$3" "$4 " "$5 " "$6 " " $7}' $HOME/$EPGLIST >>$RECORDING_FILE`
+event_parameters=`awk ' NR=="'$dialog_result'"{print $1" "$2" "$3" "$4 " "$5 " "$6 " " $7}' $HOME/$EPGLIST >>$RECORDING_FILE`
 
-     rm $DIALOG_SESSION_EPGLIST
+rm $DIALOG_SESSION_EPGLIST
 
-     rm $HOME/$EPGLIST
-   }
+rm $HOME/$EPGLIST
+ }
 
 
-function info_box ()
+function info_box()
+ {
+atime=`date +%H:%M:%S`
+
+dialog --msgbox "Version $VERSION\n\nClient time: $atime\n\nDBoxII Time: $check_nhttpd_time Channel: $CURRENT_CHANNEL\n\nPlayback Mode: $status_msg_check_playback_mode\n\nnhttpd: $status_msg_check_nhttpd"  12 42
+ }   
+
+function preview()
    {
+read_config_file
 
-    atime=`date +%H:%M:%S`
+DIALOG_PREVIEW_TMPFILE=/tmp/tmp_preview$$
 
-    dialog --msgbox "Version $VERSION\n\nClient time: $atime\n\nDBoxII Time: $check_nhttpd_time Channel: $CURRENT_CHANNEL\n\nPlayback Mode: $status_msg_check_playback_mode\n\nnhttpd: $status_msg_check_nhttpd"  12 42
-   }   
+if [ -e $RECORDING_FILE ]; then
+   
+   echo "************ Aufzunehmende Filme ************" > $DIALOG_PREVIEW_TMPFILE	
 
-function preview ()
-   {
-
-    read_config_file
-
-    DIALOG_PREVIEW_TMPFILE=/tmp/tmp_preview$$
-
-    if [ -e $RECORDING_FILE ] 
-
-    then
+   awk '{printf NR"." " "$4" "$5 " "$6 " "$7"\n\n"}' $RECORDING_FILE >>$DIALOG_PREVIEW_TMPFILE
     
-    echo "************ Aufzunehmende Filme ************" > $DIALOG_PREVIEW_TMPFILE	
+   echo "*********************************************" >> $DIALOG_PREVIEW_TMPFILE
 
-    awk '{printf NR"." " "$4" "$5 " "$6 " "$7"\n\n"}' $RECORDING_FILE >>$DIALOG_PREVIEW_TMPFILE
-    
-    echo "*********************************************" >> $DIALOG_PREVIEW_TMPFILE
+   echo "" >> $DIALOG_PREVIEW_TMPFILE 
 
-    echo "" >> $DIALOG_PREVIEW_TMPFILE 
+   echo "EPG-List            --->" >> $DIALOG_PREVIEW_TMPFILE
 
-    echo "EPG-List            --->" >> $DIALOG_PREVIEW_TMPFILE
+   awk '{printf NR"." " "$4" "$5 " "$6 " "$7"\n\n"}' $HOME/$EPGLIST >>$DIALOG_PREVIEW_TMPFILE
 
-    awk '{printf NR"." " "$4" "$5 " "$6 " "$7"\n\n"}' $HOME/$EPGLIST >>$DIALOG_PREVIEW_TMPFILE
+   echo "<---            EPG-List" >> $DIALOG_PREVIEW_TMPFILE
 
-    echo "<---            EPG-List" >> $DIALOG_PREVIEW_TMPFILE
+   dialog --title "EPG-Vorschau mit Aufnahmeliste" --textbox $DIALOG_PREVIEW_TMPFILE 20 60
 
-    dialog --title "EPG-Vorschau mit Aufnahmeliste" --textbox $DIALOG_PREVIEW_TMPFILE 20 60
+   else
 
-    else
+      echo "*** ACHTUNG: Noch keine Aufnahmeliste vorhanden ***" > $DIALOG_PREVIEW_TMPFILE
 
-    echo "*** ACHTUNG: Noch keine Aufnahmeliste vorhanden ***" > $DIALOG_PREVIEW_TMPFILE
+      echo "" >> $DIALOG_PREVIEW_TMPFILE
 
-    echo "" >> $DIALOG_PREVIEW_TMPFILE
+      echo "EPG-List            --->" >> $DIALOG_PREVIEW_TMPFILE
 
-    echo "EPG-List            --->" >> $DIALOG_PREVIEW_TMPFILE
+      awk '{printf NR"." " "$4" "$5 " "$6 " "$7"\n\n"}' $HOME/$EPGLIST >>$DIALOG_PREVIEW_TMPFILE
 
-    awk '{printf NR"." " "$4" "$5 " "$6 " "$7"\n\n"}' $HOME/$EPGLIST >>$DIALOG_PREVIEW_TMPFILE
+      echo "<---            EPG-List" >> $DIALOG_PREVIEW_TMPFILE
 
-    echo "<---            EPG-List" >> $DIALOG_PREVIEW_TMPFILE
+      dialog --title "EPG-List Vorschau" --textbox $DIALOG_PREVIEW_TMPFILE 20 60
 
-    dialog --title "EPG-List Vorschau" --textbox $DIALOG_PREVIEW_TMPFILE 20 60
-
-    fi
-   }
+fi
+ }
 
 read_config_file 
 
 case "$1" in
-    -h | --help)    help_menu ;;
-    -v | --version) echo -e "nlinuxgrab $VERSION\nWritten by Arnd Feldmueller and Max Kliche. \
-                             \n\nCopyright (C) 2002/2003" ;;
-    -t | --timerd)  timerd & ;;
-    -k | --kill)    kill_grab ;;
-    *)              first_build ;; 
+     -h | --help)    help_menu ;;
+     -v | --version) echo -e "nlinuxgrab $VERSION\nWritten by Arnd Feldmueller and Max Kliche. \
+                              \n\nCopyright (C) 2002/2003" ;;
+     -t | --timerd)  timerd & ;;
+     -k | --kill)    kill_grab ;;
+     *)              first_build ;; 
 esac
