@@ -13,7 +13,7 @@ EPGLIST=".epglist"
 # DBoxII IP or hostname
 DBOX_IP="192.168.0.3"		
 	
-# Path to grab
+# Total path to grab
 GRAB_BIN="/home/submuffi/bin/grab"
 
 # Disk space path
@@ -28,8 +28,17 @@ CURRENT_CHANNEL=`lynx -dump http://$DBOX_IP/control/zapto`
 # the recording file list
 RECORDING_FILE=$HOME/.recordingfile
 
-epg_count=1
-#rm $HOME/$EPGLIST
-# EPG field select
+# Total path to netcat
+NETCAT_BIN="/usr/bin/netcat"
 
-VERSION="1.14"
+# streamport for timerd@dbox2 (set it in neutrino with the same value)
+STREAMPORT=4444
+
+# EPG count
+epg_count=1
+
+# Remove $EPGLIST
+#rm $HOME/$EPGLIST
+
+# version
+VERSION="1.15"

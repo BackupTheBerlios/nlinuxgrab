@@ -14,7 +14,7 @@
 #       little capuccino, cigarettes and motivations 
 #       by fronti ;)
 #
-#	revision: 1.14
+#	revision: 1.15
 #
 #       $ID$
 
@@ -32,6 +32,20 @@ function read_config_file ()
 
     fi
    }
+
+
+# Help menu
+
+function help_menu ()
+   {
+    echo -e "Usage: $0 [OPTION]"
+    echo -e "\n-t, --timerd\t\ttimerd@dbox2 function"
+    echo -e "-h, --help\t\tdisplay this help and exit"
+    echo -e "-v, --version\t\toutput version information and exit"
+    echo -e "\notherwise starts remote programming for dbox2"
+    echo -e "\nReport bugs to <arnd.feldmueller@t-online.de>."
+   }
+
 
 # EPG field select
 
@@ -114,6 +128,82 @@ function check_playback_mode ()
 
    fi
   }
+
+
+# timerd build
+
+function timerd ()
+   {
+    read_config_file   
+
+    action=NULL   
+
+    while [ $action = $action ]; 
+
+    do
+    
+    STREAMXMLFILE=/tmp/.stream.xml.$$
+
+    STREAMDATE=`date "+%H-%M-%S_%d-%m-%Y"`
+
+    $NETCAT_BIN -l -p $STREAMPORT > $STREAMXMLFILE
+
+    if [ -s $STREAMXMLFILE ]
+
+    then
+    
+    streamchannel=`(grep "\<channelname" < $STREAMXMLFILE) | sed "s/<[^<>]*>//g" | sed -e "s/ /_/g" | sed -e "s/^_*//g"`
+    
+    streamtitle=`(grep "\<epgtitle" < $STREAMXMLFILE) | sed "s/<[^<>]*>//g" | sed -e "s/ /_/g" | sed -e "s/^_*//g"`
+
+    streamdec_vpid=`(grep "\<videopid" < $STREAMXMLFILE) | sed "s/<[^<>]*>//g"`
+ 
+    streamdec_apid=`(grep "\<audiopids selec" < $STREAMXMLFILE) | sed "s/<audiopids selected\=\"//g" | sed "s/\">//g"`
+
+    vpid=`printf %0x streamdec_vpid`    
+  
+    apid=`printf %0x streamdec_apid`
+
+    filestreamname=$DISK_SPACE/$streamtitle\_$streamchannel\_$STREAMDATE
+
+    grab_check=`ps | grep grab | grep -v grep`
+
+    action=`(grep "\<record c" < $STREAMXMLFILE) | sed "s/<record command\=\"//g" | sed "s/\">//g"`
+
+    if [ $action = stop ]; then
+    
+    grab_pid_search=`ps aux | grep -i grab | grep -v grep | cut -d " " -f 2` 
+
+    kill -9 $grab_pid_search
+    
+    echo "Stopp!" 5 29
+
+    wait
+
+    fi
+
+    if [ $action = record ]; 
+
+    then if [ -n $grabpid ]; then
+
+    echo  "Aufnahme von : "$filestreamname
+
+    ($GRAB_BIN -q -host $DBOX_IP -p $vpid $apid -s $MPGSIZE -o $filestreamname) & 
+ 
+    fi
+
+    fi
+
+    rm $STREAMXMLFILE
+
+    else
+
+    echo "Warte auf Aufnahme..."
+
+    fi
+
+    done
+   }
 
 
 # first build
@@ -397,7 +487,13 @@ function preview ()
 
     fi
    }
- 
 
+read_config_file 
 
-first_build
+case "$1" in
+    -h | --help)    help_menu ;;
+    -v | --version) echo -e "nlinuxgrab $VERSION\nWritten by Arnd Feldmueller and Max Kliche. \
+                             \n\nCopyright (C) 2002/2003" ;;
+    -t | --timerd)  timerd ;;
+    *)              first_build ;; 
+esac
