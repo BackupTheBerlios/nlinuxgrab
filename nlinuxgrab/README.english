@@ -16,7 +16,7 @@ wget		=> 1.7
 lynx		=> 2.8.4
 
 grab      	use it from CVS CDK!
-
+or  http://www.submuffi.de/~submuffi/grab.tar.bz2
 
 ATTENTION: Please check your system- and DBOX2 Time!!!!!!!!!!!!
 
@@ -46,4 +46,8 @@ STREAMPORT=4444
 1.16 23/08/2002
 
 Flag -k (--kill) for killing current running grab
+
+1.17 27/09/2002
+
+Parse error in pipe for atjob fixed
 

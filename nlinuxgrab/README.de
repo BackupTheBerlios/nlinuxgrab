@@ -50,3 +50,7 @@ STREAMPORT=4444
 1.16 23/08/2002
 
 Flag -k (--kill) um den laufen grab zu beenden.
+
+1.17 27/09/2002
+
+Fehler beim Parsen behoben (at)
