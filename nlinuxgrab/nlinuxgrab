@@ -17,6 +17,7 @@
 #	revision: 1.15
 #
 #       $ID$
+#
 
 function read_config_file ()
    {

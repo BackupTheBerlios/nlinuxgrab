@@ -1,4 +1,4 @@
-Version 1.14
+Version 1.15
 
 nlinuxgrab von Arnd Feldmueller <Submuffi@IRC> und Max Kliche <fronti@IRC>
 
@@ -14,8 +14,12 @@ awk 		=> 3.1.0
 dialog		=> 0.62
 wget		=> 1.7
 lynx		=> 2.8.4
+netcat		=> 1.10
+grep		=> 2.4.2
 
 grab		liegt nicht mehr bei! bitte das aus dem CVS CDK nehmen
+		oder http://www.submuffi.de/~submuffi/grab.tar.bz2
+                (modifizierte Version)
 
 
 ACHTUNG: Bitte pruefen ob die Systemzeit mit der von der DBox2 einigermassen identisch ist!!!
@@ -30,3 +34,17 @@ MPGSIZE in config_nlinuxgrab hinzugefuegt fuer MPG Laenge. Standard ist jetzt 70
 1.14 06/08/2002
 
 nlinuxgrab ist kein GPL project mehr
+
+1.15 22/08/2002
+
+nlinuxgrab kann jetzt flags ./nlinuxgrab -h oder --help
+timerd (-t bzw. --timerd daemon) fuer timerd@dbox2 (neutrino)
+config_nlinuxgrab erweitert auf:
+
+# Total path to netcat
+NETCAT_BIN="/usr/bin/netcat"
+
+# streamport for timerd@dbox2 (set it in neutrino with the same value)
+STREAMPORT=4444
+
+
